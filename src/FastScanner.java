@@ -5,6 +5,7 @@ public class FastScanner {
     public BufferedReader br;
     public StringTokenizer st;
 
+
     public FastScanner(InputStream in) {
         br = new BufferedReader(new InputStreamReader(in));
     }
@@ -76,4 +77,5 @@ public class FastScanner {
         }
         return ret;
     }
+
 }
