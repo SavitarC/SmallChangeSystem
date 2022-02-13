@@ -24,7 +24,7 @@ public class FastScanner {
 
     public boolean hasMoreTokens() {
         while (st == null || !st.hasMoreElements()) {
-            String line = null;
+            String line;
             try {
                 line = br.readLine();
             } catch (IOException e) {
@@ -40,7 +40,7 @@ public class FastScanner {
 
     public String next() {
         while (st == null || !st.hasMoreElements()) {
-            String line = null;
+            String line;
             try {
                 line = br.readLine();
             } catch (IOException e) {
