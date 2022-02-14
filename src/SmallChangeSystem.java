@@ -1,6 +1,5 @@
 import java.io.*;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -21,23 +20,18 @@ public class SmallChangeSystem {
             File detail = new File("detail.txt");
             detail.createNewFile();
             BigDecimal total = BigDecimal.valueOf(0);
-            RandomAccessFile raf = new RandomAccessFile("detail.txt", "r");
-            long len = raf.length();
-            String lastLine = "";
-            if (len != 0L) {
-                long pos = len - 1;
-                while (pos > 0) {
-                    pos--;
-                    raf.seek(pos);
-                    if (raf.readByte() == '\n') {
-                        lastLine = raf.readLine();
-                        lastLine = new String(lastLine.getBytes("8859_1"), StandardCharsets.UTF_8);
-                        break;
-                    }
-                }
-                total = new BigDecimal(lastLine.substring(lastLine.lastIndexOf("余额") + 3));
+
+            /*取detail.txt文件最后一行(若存在)以修正余额*/
+            BufferedReader br = new BufferedReader(new FileReader(detail));
+            String line = br.readLine(), lastLine = "";
+            while (line != null) {
+                lastLine = line.trim();
+                line = br.readLine();
             }
-            raf.close();
+            if (!lastLine.equals("")) {
+                total = new BigDecimal(lastLine.substring(lastLine.lastIndexOf("余额") + 3));
+            }//修正完毕
+
             do {
                 out.println("----------零钱通菜单----------");
                 out.println("        1.零钱通明细");
@@ -59,10 +53,10 @@ public class SmallChangeSystem {
                     case "2" -> {
                         System.out.println("2.收益入账");
                         BigDecimal a = BigDecimal.valueOf(in.nextDouble());
-                        int r=a.compareTo(BigDecimal.ZERO);
-                        if (r < 0){
+                        int r = a.compareTo(BigDecimal.ZERO);
+                        if (r < 0) {
                             out.println("数据有误");
-                        }else{
+                        } else {
                             total = total.add(a);
                             income(a, total);
                             out.println("入账记录成功");
@@ -71,10 +65,10 @@ public class SmallChangeSystem {
                     case "3" -> {
                         System.out.println("3.消费");
                         BigDecimal a = BigDecimal.valueOf(in.nextDouble());
-                        int r=a.compareTo(BigDecimal.ZERO);
-                        if (r < 0){
+                        int r = a.compareTo(BigDecimal.ZERO);
+                        if (r < 0) {
                             out.println("数据有误");
-                        }else{
+                        } else {
                             total = total.subtract(a);
                             outcome(a, total);
                             out.println("消费记录成功");
@@ -83,11 +77,12 @@ public class SmallChangeSystem {
                     case "4" -> {
                         System.out.println("4.清空记录");
                         System.out.println("确认清空记录请输入 y");
-                        String ensure=in.next();
-                        if (Objects.equals(ensure, "y")){
+                        String ensure = in.next();
+                        if (Objects.equals(ensure, "y")) {
                             clean(detail);
+                            total = BigDecimal.valueOf(0);
                             out.println("已清空");
-                        }else{
+                        } else {
                             out.println("错误，已退出");
                             loop = false;
                         }
@@ -106,6 +101,9 @@ public class SmallChangeSystem {
         }
     }
 
+    /**
+     * 输出detail.txt文件内容
+     */
     public void detail() throws IOException {
         {
             Reader in = new FileReader("detail.txt");
@@ -121,6 +119,9 @@ public class SmallChangeSystem {
         }
     }
 
+    /**
+     * 记录income
+     */
     public void income(BigDecimal a, BigDecimal total) {
         Date date = new Date();
         SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -145,6 +146,9 @@ public class SmallChangeSystem {
         }
     }
 
+    /**
+     * 记录outcome
+     */
     public void outcome(BigDecimal a, BigDecimal total) {
         FastScanner in = new FastScanner(System.in);
         Date date = new Date();
@@ -170,13 +174,16 @@ public class SmallChangeSystem {
         }
     }
 
-    public void clean(File detail){
+    /**
+     * 清空detail.txt
+     */
+    public void clean(File detail) {
         try {
-            FileWriter fw =new FileWriter(detail);
-            fw.write("\n");
+            FileWriter fw = new FileWriter(detail);
+            fw.write("");
             fw.flush();
             fw.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
